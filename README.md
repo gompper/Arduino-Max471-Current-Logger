@@ -7,12 +7,16 @@ Acquired data is averaged over 64 samples and sent via serial connection to PC. 
 ## Wiring
 Wiring is done analog to this [diagram](https://wolles-elektronikkiste.de/wp-content/uploads/2020/08/max471___Basic-1024x609.png)
 
-## Plot
-Data gets plotted after receiving it via serial connection using the main client [`./py/serial_read.py`](./py/serial_read.py):
+## Usage
+1. Connect the Board and Consumer according to [Wiring](#wiring).
+2. Upload the Arduino Code
+3. Start the [client](./py/serial_read.py) on the PC:
 ```
 $python3 ./py/serial_read.py
 ```
-, but can separately be read using the the script [`./py/plot_amps.py`](./py/plot_amps.py):
+
+## Plot
+If you want to plot data separately use the script [`./py/plot_amps.py`](./py/plot_amps.py):
 ```
-$ python3 ./py/serial_read.py <./path/to/data.npy>
+$ python3 ./py/plot_amps.py <./path/to/data.npy>
 ```
