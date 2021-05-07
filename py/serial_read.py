@@ -1,8 +1,8 @@
 import serial 
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import plot_amps
 
 FILENAME = '{:%Y-%m-%d_%H.%M.%S}'.format(datetime.datetime.now())
 FILEPATH = './data/'
@@ -16,10 +16,6 @@ def saveData(data):
     f = open(FILE,"wb")
     np.save(f,data)
     f.close()
-
-def plotData(data):
-    plt.plot(buf_np)
-    plt.show()
 
 buffer = ""
 buf_arr = []
@@ -47,5 +43,5 @@ with serial.Serial('COM3', 115200, timeout=1) as ser:
     print(round((len(buf_arr)/(end-start))*64,2), "sample/s")
     buf_np = np.asarray(buf_arr)
     saveData(buf_np)
-    plotData(buf_np)
+    plot_amps.plotData(FILE)
         
