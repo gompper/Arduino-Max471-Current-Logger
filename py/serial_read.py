@@ -12,17 +12,20 @@ FILE = FILEPATH + FILENAME + FILEEXTENSION
 def ADCRaw2Amp(val,BITS,MAXVAL):
     return val*MAXVAL/(pow(2,BITS)-1)
 
-def saveData(data):
+def saveDataToFile(data):
     f = open(FILE,"wb")
     np.save(f,data)
     f.close()
 
 buffer = ""
 buf_arr = []
-with serial.Serial('COM3', 115200, timeout=1) as ser:
+with serial.Serial('COM7', 115200, timeout=1) as ser:
     start = time.time()
-    for _ in range(1000):
+    while(len(buf_arr)<10000):
+        # read one byte
         oneByte = ser.read(1)
+        
+        # test if received byte is line break
         if oneByte == b"\r":    
             try:
                 buf_int = int(buffer)
@@ -30,6 +33,8 @@ with serial.Serial('COM3', 115200, timeout=1) as ser:
             except ValueError:
                 buffer = ""
                 continue
+            
+            # convert raw data to ampère
             buf_converted = ADCRaw2Amp(buf_int,10,5)
             buf_arr.append(buf_converted)
             buffer = ""
@@ -40,8 +45,12 @@ with serial.Serial('COM3', 115200, timeout=1) as ser:
                 buffer = ""
                 continue
     end = time.time()
-    print(round((len(buf_arr)/(end-start))*64,2), "sample/s")
+    
+    # calculate samples/second (averaging over 64 samples is done on arduino)
+    SamplesPerSecond = (len(buf_arr)/(end-start))*64
+    print(round(SamplesPerSecond,2), "sample/s")
+
     buf_np = np.asarray(buf_arr)
-    saveData(buf_np)
+    saveDataToFile(buf_np)
     plot_amps.plotData(FILE)
         
