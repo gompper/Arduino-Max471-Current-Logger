@@ -6,6 +6,8 @@ def plotData(FILE):
     with open(FILE,"rb") as f:
         loaded_data = np.load(f)
     plt.plot(loaded_data)
+    plt.xlabel("Sample*64")
+    plt.ylabel("Ampère")
     plt.show()
 
 def main(arg):
