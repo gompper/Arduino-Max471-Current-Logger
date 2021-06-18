@@ -2,12 +2,19 @@ import serial
 import time
 import numpy as np
 import datetime
-import plot_amps
+import threading
 
-FILENAME = '{:%Y-%m-%d_%H.%M.%S}'.format(datetime.datetime.now())
-FILEPATH = './data/'
-FILEEXTENSION = ".npy"
-FILE = FILEPATH + FILENAME + FILEEXTENSION
+# Config: Serial 
+COMPORT         = 'COM6'
+BAUDRATE        = 115200
+
+# Config: Output File
+FILENAME        = '{:%Y-%m-%d_%H.%M.%S}'.format(datetime.datetime.now())
+FILEPATH        = './data/'
+FILEEXTENSION   = ".npy"
+FILE            = FILEPATH + FILENAME + FILEEXTENSION
+
+RUN             = True
 
 def ADCRaw2Amp(val,BITS,MAXVAL):
     return val*MAXVAL/(pow(2,BITS)-1)
@@ -17,12 +24,14 @@ def saveDataToFile(data):
     np.save(f,data)
     f.close()
 
-def capture():
+def startCapture():
+    global RUN
     buffer = ""
     buf_arr = []
-    with serial.Serial('COM6', 115200, timeout=1) as ser:
+    with serial.Serial(COMPORT, BAUDRATE, timeout=1) as ser:
         start = time.time()
-        while(len(buf_arr)<1000):
+        print("Start capturing...")
+        while(RUN):
             # read one byte
             oneByte = ser.read(1)
             
@@ -47,13 +56,22 @@ def capture():
                     continue
         end = time.time()
         
+        print("Stopped capturing.")
+        print("Total time elapsed:",round(end-start,2)," seconds.")
         # calculate samples/second (averaging over 64 samples is done on arduino)
         SamplesPerSecond = (len(buf_arr)/(end-start))*64
         print(round(SamplesPerSecond,2), "sample/s")
 
         buf_np = np.asarray(buf_arr)
         saveDataToFile(buf_np)
-        plot_amps.plotData(FILE)
         
+def stopCapture():
+    global RUN
+    RUN = False
+
 if __name__ == "__main__":
-    capture()
+    capture = threading.Thread(target=startCapture)
+    capture.start()
+    time.sleep(5)
+    stopCapture()
+    capture.join()
