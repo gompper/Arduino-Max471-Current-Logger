@@ -1,8 +1,22 @@
+/*
+So looks like using a prescale of 16 as above would give an ADC clock of 1 MHz and a sample rate of ~77KHz without much loss of resolution.
+*/
+// defines for setting and clearing register bits
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
+
+
+
 int analogPin = A3; 
 int digitalPin = 2;
 int led = 13;           
 unsigned int val = 0;  
 unsigned int val_avg = 0;
+
 
 /*
 Averaging over 64 samples.
@@ -22,11 +36,16 @@ void measure(){
 }
 
 void setup() {
+  // set prescale to 16
+  sbi(ADCSRA,ADPS2) ;
+  cbi(ADCSRA,ADPS1) ;
+  cbi(ADCSRA,ADPS0) ;
+  
   pinMode(digitalPin, INPUT);
   pinMode(led, OUTPUT);
   Serial.begin(115200);           
 }
 
 void loop() {
-  measure();
+    measure();
 }
