@@ -28,11 +28,5 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(digitalPin)){
-    measure();
-    digitalWrite(led, HIGH);
-  }else{
-    digitalWrite(led, LOW);
-  }
-
+  measure();
 }
