@@ -9,14 +9,13 @@ So looks like using a prescale of 16 as above would give an ADC clock of 1 MHz a
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-
-
 int analogPin = A3; 
 int digitalPin = 2;
 int led = 13;           
 unsigned int val = 0;  
 unsigned int val_avg = 0;
 
+// #define CONTINUOUS_SAMPLE
 
 /*
 Averaging over 64 samples.
@@ -43,9 +42,20 @@ void setup() {
   
   pinMode(digitalPin, INPUT);
   pinMode(led, OUTPUT);
-  Serial.begin(115200);           
+  digitalWrite(led,LOW);
+  Serial.begin(115200);     
+        
 }
 
 void loop() {
+  #ifdef CONTINUOUS_SAMPLE
     measure();
+  #else
+    if (digitalRead(digitalPin)){
+      measure();
+      digitalWrite(led, HIGH);
+    }else{
+      digitalWrite(led, LOW);
+    }
+  #endif
 }
