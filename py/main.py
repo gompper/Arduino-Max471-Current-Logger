@@ -7,7 +7,7 @@ ca_file     = './ca.pem'
 broker      = "broker-gompbach"
 port        = 8883
 qos         = 2
-BOOTCOUNTS  = 2
+BOOTCOUNTS  = 300
 
 def on_connect(client, userdata, flags, rc):  # The callback for when the client connects to the broker
     print("Connected with result code {0}".format(str(rc)))  # Print result of connection attempt
