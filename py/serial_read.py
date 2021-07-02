@@ -3,9 +3,11 @@ import time
 import numpy as np
 import datetime
 import threading
+import sys
+import plot_amps as pa
 
 # Config: Serial 
-COMPORT         = 'COM6'
+COMPORT         = 'COM7'
 BAUDRATE        = 115200
 
 # Config: Output File
@@ -65,13 +67,17 @@ def startCapture():
         buf_np = np.asarray(buf_arr)
         saveDataToFile(buf_np)
         
+        
 def stopCapture():
     global RUN
     RUN = False
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        COMPORT = sys.argv[1]
     capture = threading.Thread(target=startCapture)
     capture.start()
-    time.sleep(5)
+    time.sleep(20)
     stopCapture()
     capture.join()
+    pa.plotData(FILE)
