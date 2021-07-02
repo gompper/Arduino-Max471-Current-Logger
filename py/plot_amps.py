@@ -8,13 +8,12 @@ from numpy.lib.function_base import average
 def plotData(FILE):
     with open(FILE,"rb") as f:
         loaded_data = np.load(f)
-    
     amps_average = np.sum(loaded_data) / loaded_data.size
     print("average ampere consumption:",amps_average)
 
     plt.plot(loaded_data)
-    plt.xlabel("Sample*64")
-    plt.ylabel("Ampère")
+    plt.xlabel("Sample [1*64]")
+    plt.ylabel("Current [Ampère]")
     plt.show()
 
 def main(arg):
