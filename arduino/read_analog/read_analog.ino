@@ -1,58 +1,36 @@
-/*
-So looks like using a prescale of 16 as above would give an ADC clock of 1 MHz and a sample rate of ~77KHz without much loss of resolution.
-*/
-// defines for setting and clearing register bits
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-#endif
-
-int analogPin = A3; 
-int digitalPin = 2;
-int led = 13;           
-unsigned int val = 0;  
-unsigned int val_avg = 0;
-
 // #define CONTINUOUS_SAMPLE
 
-/*
-Averaging over 64 samples.
-integer on arduiono is 16 bit, so it can store ~64.06 samples with a max value of 1023 each.
---> 2^16/1032 
-*/
-#define AVG 64 
+const unsigned int numReadings = 12;
+const int analogPin = A3;
+const int digitalPin = 2;
+const int led = 13;
+unsigned int analogVals[numReadings];
 
-void measure(){
-    for(int i=0;i<AVG;i++){
-    val = analogRead(analogPin);  
-    val_avg += val;
+void setup()
+{
+  Serial.begin(115200);
+  ADCSRA |= (1 << ADPS2); // 16 Prescaler
+  pinMode(digitalPin,INPUT);
+  pinMode(led,OUTPUT);
+  pinMode(analogPin,INPUT);
+}
+
+void measureAndSend(){
+  for (int i=0; i< numReadings;i++){
+    analogVals[i] = analogRead(analogPin);
   }
-  val_avg /= AVG;
-  Serial.println(val_avg);      
-  val_avg = 0;
+  for (int i=0; i< numReadings;i++){
+    Serial.println(analogVals[i]);
+  }
 }
 
-void setup() {
-  // set prescale to 16
-  sbi(ADCSRA,ADPS2) ;
-  cbi(ADCSRA,ADPS1) ;
-  cbi(ADCSRA,ADPS0) ;
-  
-  pinMode(digitalPin, INPUT);
-  pinMode(led, OUTPUT);
-  digitalWrite(led,LOW);
-  Serial.begin(115200);     
-        
-}
-
-void loop() {
+void loop()
+{
   #ifdef CONTINUOUS_SAMPLE
-    measure();
+    measureAndSend();
   #else
     if (digitalRead(digitalPin)){
-      measure();
+      measureAndSend();
       digitalWrite(led, HIGH);
     }else{
       digitalWrite(led, LOW);
