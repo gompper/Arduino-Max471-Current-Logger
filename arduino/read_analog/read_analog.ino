@@ -47,7 +47,6 @@ void setup()
   // set ADC prescaler to 16
   ADCSRA |= (1 << ADPS2); 
   pinMode(digitalPin,INPUT);
-  pinMode(led,OUTPUT);
   pinMode(analogPin,INPUT);
   setupTimer1();
 }
