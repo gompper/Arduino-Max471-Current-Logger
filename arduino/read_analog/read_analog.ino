@@ -15,8 +15,8 @@ void setupTimer1() {
   TCCR1B = 0; 
   // set timer counter
   TCNT1 = 0;  
-  // output compare // 200 ms = 5 Hz
-  OCR1A = 5*1563; 
+  // output compare // 400 ms = 2.5 Hz
+  OCR1A = 2*1563; 
   // Output Compare Match A Interrupt Enable
   TIMSK1 |= (1 << OCIE1A);
   // activate interrupts
