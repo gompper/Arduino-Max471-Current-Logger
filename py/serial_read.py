@@ -14,24 +14,26 @@ BAUDRATE        = 115200
 FILENAME        = '{:%Y-%m-%d_%H.%M.%S}'.format(datetime.datetime.now())
 FILEPATH        = './data/'
 FILEEXTENSION   = ".npy"
-FILE            = FILEPATH + FILENAME + FILEEXTENSION
 
+DATASETS        = 0
 RUN             = True
 
 def ADCRaw2Amp(val,BITS,MAXVAL):
     return val*MAXVAL/(pow(2,BITS)-1)
 
-def saveDataToFile(data):
-    f = open(FILE,"wb")
+def saveDataToFile(data,number):
+    file = FILEPATH + FILENAME + '_' + number + FILEEXTENSION
+    f = open(file,"wb")
     np.save(f,data)
     f.close()
 
 def startCapture():
-    global RUN
+    global DATASETS 
     buffer = ""
-    buf_arr = []
+    data = []
+    data_temp = []
     with serial.Serial(COMPORT, BAUDRATE, timeout=1) as ser:
-        start = time.time()
+        timeStart = time.time()
         print("Start capturing...")
         while(RUN):
             # read one byte
@@ -41,14 +43,24 @@ def startCapture():
             if oneByte == b"\r":    
                 try:
                     buf_int = int(buffer)
-                    pass
+                    # pass
                 except ValueError:
+                    try:
+                        start = str(buffer)
+                        print(start)
+                        if DATASETS > 0:
+                            data.append(data_temp)
+                        DATASETS += 1
+                        data_temp = []
+                    except:
+                        continue
                     buffer = ""
                     continue
                 
+                # print(str(buf_int))
                 # convert raw data to ampère
                 buf_converted = ADCRaw2Amp(buf_int,10,5)
-                buf_arr.append(buf_converted)
+                data_temp.append(buf_converted)
                 buffer = ""
             else:
                 try:
@@ -56,28 +68,34 @@ def startCapture():
                 except UnicodeDecodeError:
                     buffer = ""
                     continue
-        end = time.time()
+        timeEnd = time.time()
         
         print("Stopped capturing.")
-        print("Total time elapsed:",round(end-start,2)," seconds.")
-        # calculate samples/second (averaging over 64 samples is done on arduino)
-        SamplesPerSecond = (len(buf_arr)/(end-start))*64
-        print(round(SamplesPerSecond,2), "sample/s")
+        print("Total time elapsed:",round(timeEnd-timeStart,2)," seconds.")
 
-        buf_np = np.asarray(buf_arr)
-        saveDataToFile(buf_np)
-        
+        for i in range(len(data)):
+            number = str(i)
+            data_np = np.asarray(data[i])
+            saveDataToFile(data_np,number)
         
 def stopCapture():
     global RUN
     RUN = False
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        COMPORT = sys.argv[1]
-    capture = threading.Thread(target=startCapture)
-    capture.start()
-    time.sleep(20)
+def main(**kwargs):
+    global COMPORT
+    for k,v in kwargs.items():
+        if k == 'p':
+            COMPORT = v
+        if k == 'sets':
+            maxDATASETS = int(v)
+    captureT = threading.Thread(target=startCapture)
+    captureT.start()
+    while(DATASETS<maxDATASETS):
+        time.sleep(10)
     stopCapture()
-    capture.join()
-    pa.plotData(FILE)
+    captureT.join()
+    pa.plotData(FILEPATH + FILENAME + '_0' + FILEEXTENSION,DATASETS-1)
+
+if __name__ == "__main__":
+    main( **dict(arg.split('=') for arg in sys.argv[1:]) )
