@@ -5,6 +5,8 @@ const int analogPin = A3;
 const int digitalPin = 2;
 bool stopMeasure = true;
 unsigned int analogVals[numReadings];
+int frameCounter = 0;
+int frameCounter_old = 0;
 
 void setupTimer1() {
   // Deactivate Interrupts
@@ -16,7 +18,7 @@ void setupTimer1() {
   // set timer counter
   TCNT1 = 0;  
   // output compare // 400 ms = 2.5 Hz
-  OCR1A = 2*1563; 
+  OCR1A = 3*1563; 
   // Output Compare Match A Interrupt Enable
   TIMSK1 |= (1 << OCIE1A);
   // activate interrupts
@@ -24,6 +26,7 @@ void setupTimer1() {
 }
 
 void startTimer(){
+  frameCounter++;
   stopMeasure = false;
   // CTC (clear timer on compare)
   TCCR1B |= (1 << WGM12);
@@ -54,6 +57,10 @@ void setup()
 void measureAndSend(){
   for (int i=0; i< numReadings;i++){
     analogVals[i] = analogRead(analogPin);
+  }
+  if (frameCounter != frameCounter_old){
+    Serial.println("S");
+    frameCounter_old = frameCounter;
   }
   for (int i=0; i< numReadings;i++){
     Serial.println(analogVals[i]);
