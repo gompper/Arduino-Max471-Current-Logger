@@ -5,15 +5,21 @@ from numpy.lib import load
 
 from numpy.lib.function_base import average
 
-def plotData(FILE):
-    with open(FILE,"rb") as f:
-        loaded_data = np.load(f)
-    amps_average = np.sum(loaded_data) / loaded_data.size
-    print("average ampere consumption:",amps_average)
+def plotData(FILE,totalPlots=None):
+    if totalPlots == None:
+        with open(FILE,"rb") as f:
+            loaded_data = np.load(f)
+        plt.plot(loaded_data)
+        plt.xlabel("Sample")
+        plt.ylabel("Current [Ampère]")
+    else:
+        fig,axis = plt.subplots(totalPlots)
+        for i in range(totalPlots):
+            FILE = FILE[:len(FILE)-5] + str(i) + FILE[len(FILE)-4:]
+            with open(FILE,"rb") as f:
+                loaded_data = np.load(f)
+                axis[i].plot(loaded_data)
 
-    plt.plot(loaded_data)
-    plt.xlabel("Sample [1*64]")
-    plt.ylabel("Current [Ampère]")
     plt.show()
 
 def main(arg):
