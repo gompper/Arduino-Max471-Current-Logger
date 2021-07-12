@@ -1,4 +1,5 @@
 // #define CONTINUOUS_SAMPLE
+// #define START_SAMPLE_WITH_FALLING_EDGE // else with timer interrupt
 
 const unsigned int numReadings = 1;
 const int analogPin = A3;
@@ -46,6 +47,9 @@ void setup()
 {
   // connect interrupt service routine
   attachInterrupt (digitalPinToInterrupt (digitalPin), startTimer, RISING);  // attach interrupt handler
+  #ifdef START_SAMPLE_WITH_FALLING_EDGE
+    attachInterrupt (digitalPinToInterrupt (digitalPin), stopTimer, FALLING);  // attach interrupt handler
+  #endif
   Serial.begin(115200);
   // set ADC prescaler to 16
   ADCSRA |= (1 << ADPS2); 
@@ -81,5 +85,7 @@ void loop()
 }
 
 ISR(TIMER1_COMPA_vect) {
+#ifndef START_SAMPLE_WITH_FALLING_EDGE
   stopTimer();
+#endif
 }
