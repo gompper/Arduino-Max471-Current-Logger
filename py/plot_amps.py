@@ -22,11 +22,13 @@ def plotData(FILE,totalPlots=None):
 
     plt.show()
 
-def main(arg):
-    plotData(arg)
+def main(arg,totalPlots=None):
+    plotData(arg,int(totalPlots))
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Insufficient arguments, correct usage: \n\t$ python3 plot_amps.py <./path/to/numpyfile.npy>")
-    else:
-        main(sys.argv[1])     
+    elif len(sys.argv) == 2:
+        main(sys.argv[1])
+    elif len(sys.argv) == 3:
+        main(sys.argv[1],sys.argv[2])
