@@ -15,8 +15,8 @@ def plotData(FILE,totalPlots=None):
     else:
         fig,axis = plt.subplots(totalPlots)
         for i in range(totalPlots):
-            FILE = FILE[:len(FILE)-5] + str(i) + FILE[len(FILE)-4:]
-            with open(FILE,"rb") as f:
+            FILE_temp = FILE[:len(FILE)-5] + str(i) + FILE[len(FILE)-4:]
+            with open(FILE_temp,"rb") as f:
                 loaded_data = np.load(f)
                 axis[i].plot(loaded_data)
 
