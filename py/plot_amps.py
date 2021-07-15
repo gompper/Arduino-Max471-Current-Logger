@@ -10,16 +10,19 @@ def plotData(FILE,totalPlots=None):
         with open(FILE,"rb") as f:
             loaded_data = np.load(f)
         plt.plot(loaded_data)
-        plt.xlabel("Sample")
-        plt.ylabel("Current [Ampère]")
     else:
         fig,axis = plt.subplots(totalPlots)
+        mean_list = []
         for i in range(totalPlots):
             FILE_temp = FILE[:len(FILE)-5] + str(i) + FILE[len(FILE)-4:]
             with open(FILE_temp,"rb") as f:
                 loaded_data = np.load(f)
                 axis[i].plot(loaded_data)
-
+                mean_list.append(loaded_data.mean())
+    mean_list_np = np.asarray(mean_list)
+    print("mean current:",mean_list_np.mean())
+    plt.xlabel("Sample")
+    plt.ylabel("Current [Ampère]")
     plt.show()
 
 def main(arg,totalPlots=None):
