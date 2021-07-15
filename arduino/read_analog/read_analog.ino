@@ -2,8 +2,8 @@
 * Uncomment one of the following three
 */
 // #define CONTINUOUS_SAMPLE
-#define STOP_SAMPLE_WITH_FALLING_EDGE 
-// #define STOP_SAMPLE_WITH_TIMER
+// #define STOP_SAMPLE_WITH_FALLING_EDGE 
+#define STOP_SAMPLE_WITH_TIMER
 
 const int digitalPin = 2;
 const int ledPin = 13;
@@ -48,7 +48,9 @@ ISR(TIMER1_COMPA_vect) {
 #endif
 
 void rising(){
+  #if defined(STOP_SAMPLE_WITH_TIMER) || defined(STOP_SAMPLE_WITH_FALLING_EDGE)
   nextState = MEASURE;
+  #endif
   #ifdef STOP_SAMPLE_WITH_TIMER
   // CTC (clear timer on compare)
   TCCR1B |= (1 << WGM12);
@@ -82,6 +84,10 @@ void setup()
 
   Serial.println("Start");
   
+  #ifdef CONTINUOUS_SAMPLE
+  nextState = MEASURE;
+  #endif
+
   #ifdef STOP_SAMPLE_WITH_TIMER
   setupTimer1();
   #endif
