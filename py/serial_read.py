@@ -59,7 +59,7 @@ def startCapture():
                                 samples = len(data_temp)
                                 samplerate = samples/deltaTime
                                 period = 1/samplerate
-                                print("No:",DATASETS-1,"\tTime:",round(deltaTime,5),"s\tSamples:",samples,"\tSampleRate:",round(samplerate,2),"SPS\t\tPeriod:",period,"s")
+                                print("No:",DATASETS-1,"\tTime:","{:17.16f}".format(deltaTime),"s\tSamples:",samples,"\tSampleRate:~","{:7.2f}".format(samplerate),"SPS\tPeriod:","{:20.19f}".format(period),"s")
                             DATASETS += 1
                             data_temp = []
                     except:
