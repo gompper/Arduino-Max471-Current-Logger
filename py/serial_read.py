@@ -33,7 +33,7 @@ def startCapture():
     data = []
     data_temp = []
     with serial.Serial(COMPORT, BAUDRATE, timeout=1) as ser:
-        timeStart = time.time()
+        
         print("Start capturing...")
         while(RUN):
             # read one byte
@@ -43,21 +43,30 @@ def startCapture():
             if oneByte == b"\r":    
                 try:
                     buf_int = int(buffer)
-                    # pass
+                    # print(buf_int)
+                    pass
                 except ValueError:
                     try:
-                        start = str(buffer)
-                        print(start)
-                        if DATASETS > 0:
-                            data.append(data_temp)
-                        DATASETS += 1
-                        data_temp = []
+                        message = str(buffer)
+                        if(message == '\nB'):
+                            timeStart = time.time()
+                        if(message == '\nE'):
+                            timeEnd = time.time()
+                            # skip 1st set, cause it's maybe incomplete
+                            if DATASETS > 0:
+                                data.append(data_temp)
+                                deltaTime = timeEnd-timeStart
+                                samples = len(data_temp)
+                                samplerate = samples/deltaTime
+                                period = 1/samplerate
+                                print("No:",DATASETS-1,"\tTime:",round(deltaTime,5),"s\tSamples:",samples,"\tSampleRate:",round(samplerate,2),"SPS\t\tPeriod:",period,"s")
+                            DATASETS += 1
+                            data_temp = []
                     except:
                         continue
                     buffer = ""
                     continue
                 
-                # print(str(buf_int))
                 # convert raw data to ampère
                 buf_converted = ADCRaw2Amp(buf_int,10,5)
                 data_temp.append(buf_converted)
@@ -68,10 +77,10 @@ def startCapture():
                 except UnicodeDecodeError:
                     buffer = ""
                     continue
-        timeEnd = time.time()
+       
         
         print("Stopped capturing.")
-        print("Total time elapsed:",round(timeEnd-timeStart,2)," seconds.")
+        
 
         for i in range(len(data)):
             number = str(i)
@@ -91,8 +100,8 @@ def main(**kwargs):
             maxDATASETS = int(v)
     captureT = threading.Thread(target=startCapture)
     captureT.start()
-    while(DATASETS<maxDATASETS):
-        time.sleep(10)
+    while(DATASETS<maxDATASETS+1):
+        time.sleep(1)
     stopCapture()
     captureT.join()
     pa.plotData(FILEPATH + FILENAME + '_0' + FILEEXTENSION,DATASETS-1)
